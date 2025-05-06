@@ -1,15 +1,14 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 
 export default function App() {
 
   const [politicians, setPoliticians] = useState([]);
 
   const getPoliticians = async () => {
-    const res = await fetch("https://boolean-spec-frontend.vercel.app/freetestapi/politicians")
+    const res = await fetch("http://localhost:5000/politicians")
     const data = await res.json()
     setPoliticians(data)
     console.log(data)
-    console.log(data[0].image)
   }
 
   useEffect(() => {
@@ -27,17 +26,32 @@ export default function App() {
     )
   }
 
+  const [search, setSearch] = useState("");
+
+  const filteredPoliticians = useMemo(() => {
+    return politicians.filter((politician) => {
+      return politician.name.toLowerCase().includes(search.toLowerCase()) || politician.biography.toLowerCase().includes(search.toLowerCase())
+    })
+  }, [politicians, search])
 
   return (
     <div className="container">
-      {politicians.map((politician, i) => (
+
+      <input
+        type="text"
+        value={search}
+        placeholder="Cerca nel nome e nella biografia"
+        onChange={(e) => setSearch(e.target.value)} />
+
+      {filteredPoliticians.map((politician) => (
         <PoliticianCard
-          key={i}
+          key={politician.id}
           name={politician.name}
           image={politician.image}
           position={politician.position}
           biography={politician.biography} />
       ))}
+
     </div>
   )
 }
